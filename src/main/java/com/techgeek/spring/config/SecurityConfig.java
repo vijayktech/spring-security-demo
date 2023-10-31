@@ -22,43 +22,51 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public UserDetailsService userDetailsService(){
-         UserDetails admin = User.withUsername("Vijay")
-                                   .password(passwordEncoder().encode("Pwd1"))
-                                    .roles("ADMIN")
-                                    .build();
+    public UserDetailsService userDetailsService() {
+        UserDetails admin = User.withUsername("Vijay")
+                .password(passwordEncoder().encode("Pwd1"))
+                .roles("ADMIN")
+                .build();
 
-         UserDetails user = User.withUsername("Kumar")
-                                .password(passwordEncoder().encode("Pwd2"))
-                                .roles("USER")
-                                .build();
+        UserDetails user = User.withUsername("Kumar")
+                .password(passwordEncoder().encode("Pwd2"))
+                .roles("USER")
+                .build();
 
-         return new InMemoryUserDetailsManager(admin, user);
+        return new InMemoryUserDetailsManager(admin, user);
+
+        // If UserDetails fetches from database then use DaoAuthenticationProvider
+        // Create UserInfoUSerDetailsService interface and connect to Repository and then DB and
+        // fetch the User name, password and roles
+
+        //return new UserInfoUSerDetailsService();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http.csrf().disable()
-                    .authorizeHttpRequests()
-                    .requestMatchers("/products/hello").permitAll()
-                    .anyRequest().authenticated()
-                    .and()
-                    .formLogin().and().build();
+                .authorizeHttpRequests()
+                .requestMatchers("/products/hello").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .formLogin().and().build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService());
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
+    // If UserDetails fetches from database then use DaoAuthenticationProvider
 
-        return  authenticationProvider;
-    }
+//    @Bean
+//    public AuthenticationProvider authenticationProvider() {
+//        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+//        authenticationProvider.setUserDetailsService(userDetailsService());
+//        authenticationProvider.setPasswordEncoder(passwordEncoder());
+//
+//        return authenticationProvider;
+//    }
 
 }
