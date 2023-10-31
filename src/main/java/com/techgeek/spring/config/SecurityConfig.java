@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,6 +22,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    // UserDetails is prepared and stored to InMemory.
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails admin = User.withUsername("Vijay")
@@ -42,15 +44,35 @@ public class SecurityConfig {
         //return new UserInfoUSerDetailsService();
     }
 
+    /*
+     Below changes for Spring boot 3.0.1
+    **/
+
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//
+//        return http.csrf().disable()
+//                .authorizeHttpRequests()
+//                .requestMatchers("/products/hello").permitAll()
+//                .anyRequest().authenticated()
+//                .and()
+//                .formLogin().and().build();
+//    }
+
+    /*
+     Changes made below for Spring boot 3.1.1
+    // Few classes has deprecated
+    **/
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        return http.csrf().disable()
-                .authorizeHttpRequests()
-                .requestMatchers("/products/hello").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .formLogin().and().build();
+        return http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth ->
+                        auth.requestMatchers("/products/hello", "/products/new")
+                                .permitAll()
+                                .requestMatchers("/products/**")
+                                .authenticated()
+                )
+                .httpBasic(Customizer.withDefaults()).build();
     }
 
     @Bean
